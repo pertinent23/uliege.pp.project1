@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
                switch (result)
                {
                   case -1:
-                     printf("\n>> Le nom du fichier en output est malformé.");
+                     printf("\n>> Le nom du fichier en sortie est malformé.");
                      break;
 
                   case -2:

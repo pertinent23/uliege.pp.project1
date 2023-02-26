@@ -256,7 +256,7 @@ int load_pnm(PNM **image, char* filename) {
          taille_pixel = 3;
 
       longueur_ligne *= taille_pixel;
-      longueur_ligne += 1;
+      longueur_ligne += 2;
       ligne = (char *) malloc(sizeof(char)*longueur_ligne);
       int result;
 
@@ -268,7 +268,7 @@ int load_pnm(PNM **image, char* filename) {
           * dans le fichier 
          */
          while (fscanf(fichier, "#%*[^\n]%*c") != 0);
-
+         
          if (
             fgets(ligne, longueur_ligne, fichier) == NULL || 
             (result = decoupe(ligne, (*image)->matrice[i], (*image)->nb_colones*taille_pixel)) != (*image)->nb_colones*taille_pixel
@@ -276,7 +276,7 @@ int load_pnm(PNM **image, char* filename) {
          {
             fclose(fichier);
             detruit(*image);
-            return -2;
+            return -3;
          }
 
          i++;
