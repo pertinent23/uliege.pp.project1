@@ -16,6 +16,9 @@
 #ifndef __PNM__
 #define __PNM__
 
+#define MAXIMUM_POUR_COULEUR 65536
+#define MAXIMUN_POUR_PIXEL 255
+
 /**
  * Déclaration du type opaque PNM
  *

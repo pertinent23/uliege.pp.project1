@@ -69,4 +69,14 @@ TYPE_FICHIER format_vers_type_fichier(char *format);
 char *nombre_magique_vers_str(NOMBRE_MAGIQUE nb);
 
 
+/**
+ * @brief 
+ * retourne le nombre de chiffre d'un nombre
+ * 
+ * @param nb 
+ * @return unsigned int 
+ */
+unsigned int nombre_de_chiffre(int nb);
+
+
 #endif // 

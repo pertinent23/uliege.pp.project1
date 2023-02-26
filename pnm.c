@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "utils.h"
 #include "pnm.h"
@@ -26,6 +27,7 @@ struct PNM_t {
    /* Insérez ici les champs de la structure PNM */
    int nb_colones;
    int nb_lignes;
+   unsigned int maximun_pixel;
    int **matrice;
    TYPE_FICHIER type;
    NOMBRE_MAGIQUE nombre_magique;
@@ -77,11 +79,14 @@ static int initialise(struct PNM_t *image, int lignes, int colones)
          return 1;
       }
 
-      int i = 0;
+      int i = 0, nb_pixel = 1;
+
+      if (image->nombre_magique == P3)
+         nb_pixel = 3;
 
       for(; i<lignes; i++)
       {
-         image->matrice[i] = (int *) malloc(sizeof(int) * colones);
+         image->matrice[i] = (int *) malloc(sizeof(int) * colones * nb_pixel);
          if (image->matrice[i] == NULL)
          {
             for(; i>=0; i--)
@@ -125,6 +130,9 @@ int load_pnm(PNM **image, char* filename) {
    assert(image != NULL && filename != NULL);
 
    FILE *fichier = fopen(filename, "r");
+   unsigned int longueur_ligne = 0;
+   char *ligne, nombre_magique[3];
+   const char *commentaire_regex = "#%[^\n]";
 
    if (fichier != NULL)
    {
@@ -136,17 +144,190 @@ int load_pnm(PNM **image, char* filename) {
          return -1;
       }
 
+      /**
+       * @brief 
+       * permet le filtrage des commentaires
+       * dans le fichier 
+      */
+      while (fscanf(fichier, commentaire_regex) != 0);
+
+      if (fscanf(fichier, "%s", nombre_magique) != 1 || ((*image)->nombre_magique = str_vers_nombre_magique(nombre_magique)) == NOMBRE_MAGIQUE_INCONNU)
+      {
+         fclose(fichier);
+         return -3;
+      }
+
+
+      /**
+       * @brief 
+       * permet le filtrage des commentaires
+       * dans le fichier 
+      */
+      while (fscanf(fichier, commentaire_regex) != 0);
+
+      if (fscanf(fichier, "%*s%d%*s%d", &(*image)->nb_colones, &(*image)->nb_lignes) != 2)
+      {
+         fclose(fichier);
+         return -3;
+      }
+
+      if ((*image)->nombre_magique != P1)
+      {
+         /**
+          * @brief 
+          * permet le filtrage des commentaires
+          * dans le fichier 
+         */
+         while (fscanf(fichier, commentaire_regex) != 0);
+
+         if (
+            fscanf(fichier, "%*s%d", &(*image)->maximun_pixel) != 1 ||
+            ((*image)->nombre_magique == P2 && (*image)->maximun_pixel > MAXIMUN_POUR_PIXEL) ||
+            ((*image)->nombre_magique == P3 && (*image)->maximun_pixel > MAXIMUM_POUR_COULEUR)
+         ) 
+         {
+            fclose(fichier);
+            return -3;
+         }
+
+      }
+      else
+         (*image)->maximun_pixel = 1; 
+
+      
+      (*image)->type = str_vers_type_fichier(filename);
+      /**
+       * @brief 
+       * ici nous verifions si les extensions de fichiers
+       * correspondent à leur nombre magique 
+      */
+      switch ((*image)->nombre_magique)
+      {
+         case P1:
+            if ((*image)->type != PBM)
+            {
+               fclose(fichier);
+               return -2;
+            }
+            break;
+         
+         case P2:
+            if ((*image)->type != PGM)
+            {
+               fclose(fichier);
+               return -2;
+            }
+            break;
+         
+         case P3:
+            if ((*image)->type != PGM)
+            {
+               fclose(fichier);
+               return -2;
+            }
+            break;
+      }
+
+      /**
+       * @brief 
+       * ici nous créons la matrice qui va contenir tous les
+       * pixels de l'image 
+      */
+      if (initialise(*image, (*image)->nb_lignes, (*image)->nb_colones))
+      {
+         fclose(fichier);
+         return -1;
+      }
+
+      /**
+       * @brief 
+       * la longueur maximale d'un ligne est égale au nombre de chiffres de la 
+       * valeur d'un pixel fois le nombre de colones de l'image, plus le nombre
+       * de caractères d'espacement de la ligne (nombre de colones - 1) plus 1
+       * (pour le symbol de fin des chaines de caractères)
+      */
+      longueur_ligne = (*image)->nb_colones*nombre_de_chiffre((*image)->maximun_pixel) + (*image)->nb_colones;
+
+      if ((*image)->nombre_magique == P3)
+         longueur_ligne *= 3;
+
+      longueur_ligne += 1;
+      ligne = (char *) malloc(sizeof(char)*longueur_ligne);
+
       fclose(fichier);
    }
-
-   /* Insérez le code ici */
 
    return -2;
 }
 
 int write_pnm(PNM *image, char* filename) {
+   assert(image != NULL && filename != NULL);
 
+   FILE *fichier;
+   char *ligne, pixel[7];
+   const char *invalide = "/\\:*?\"<>|";
+   int i = 0, j, longueur_ligne, length = (int) strlen(filename);
+
+   while (i<length)
+   {
+      if (strchr(invalide, filename[i]) != NULL)
+         return -1;
+      i++;
+   }
+   
+   fichier = fopen(filename, "w");
+
+   if (image == NULL)
+      return -2;
+
+   fprintf(fichier, "%s\n", nombre_magique_vers_str(image->nombre_magique));
+   fprintf(fichier, "%d %d\n", image->nb_colones, image->nb_lignes);
+
+   if (image->nombre_magique != P1)
+      fprintf(fichier, "%u\n", image->maximun_pixel);
+
+   /**
+    * @brief 
+    * la longueur maximale d'un ligne est égale au nombre de chiffres de la 
+    * valeur d'un pixel fois le nombre de colones de l'image, plus le nombre
+    * de caractères d'espacement de la ligne (nombre de colones - 1) plus 1
+    * (pour le symbol de fin des chaines de caractères)
+   */
+   longueur_ligne = image->nb_colones*nombre_de_chiffre(image->maximun_pixel) + image->nb_colones;
+
+   if (image->nombre_magique == P3)
+      longueur_ligne *= 3;
+
+   longueur_ligne += 1;
+   ligne = (char *) malloc(sizeof(char)*longueur_ligne);
+
+   if (ligne == NULL)
+   {
+      fclose(fichier);
+      remove(filename);
+      return -2;
+   }
+
+   i = 0;
+
+   for(; i<image->nb_lignes; i++)
+   {
+      j = 0;
+      ligne[0] = '\0';
+
+      for(; j<image->nb_colones; j++)
+      {
+         sprintf(pixel, "%d", image->matrice[i][j]);
+         strcat(ligne, pixel);
+         strcat(ligne, " ");
+      }
+
+      fprintf(fichier, "%s\n", ligne);
+   }
+
+   fclose(fichier);
    detruit(image);
+
    return 0;
 }
 

@@ -99,3 +99,16 @@ char *nombre_magique_vers_str(NOMBRE_MAGIQUE nb)
             return "";
     }
 }
+
+unsigned int nombre_de_chiffre(int nb)
+{
+    unsigned int result = 1;
+
+    while (nb >= 10)
+    {
+        nb /= 10;
+        result++;
+    }
+    
+    return result;
+}
