@@ -78,5 +78,17 @@ char *nombre_magique_vers_str(NOMBRE_MAGIQUE nb);
  */
 unsigned int nombre_de_chiffre(int nb);
 
+/**
+ * @brief 
+ * cette fonction va chercher tous les entiers dans une chaine
+ * de caractère et les socker dans un tableau
+ * 
+ * @param str 
+ * @param tableau 
+ * @param nb_caractere 
+ * @return unsigned int 
+*/
+unsigned int decoupe(char *str, int *tableau, int nb_caractere);
+
 
 #endif // 

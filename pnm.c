@@ -131,8 +131,8 @@ int load_pnm(PNM **image, char* filename) {
 
    FILE *fichier = fopen(filename, "r");
    unsigned int longueur_ligne = 0;
-   char *ligne, nombre_magique[3];
-   const char *commentaire_regex = "#%[^\n]";
+   int i = 0;
+   char *ligne, nombre_magique[3], taille_pixel = 1;
 
    if (fichier != NULL)
    {
@@ -149,9 +149,9 @@ int load_pnm(PNM **image, char* filename) {
        * permet le filtrage des commentaires
        * dans le fichier 
       */
-      while (fscanf(fichier, commentaire_regex) != 0);
+      while (fscanf(fichier, "#%*[^\n]%*c") != 0);
 
-      if (fscanf(fichier, "%s", nombre_magique) != 1 || ((*image)->nombre_magique = str_vers_nombre_magique(nombre_magique)) == NOMBRE_MAGIQUE_INCONNU)
+      if (fscanf(fichier, "%s\n", nombre_magique) != 1 || ((*image)->nombre_magique = str_vers_nombre_magique(nombre_magique)) == NOMBRE_MAGIQUE_INCONNU)
       {
          fclose(fichier);
          return -3;
@@ -163,9 +163,10 @@ int load_pnm(PNM **image, char* filename) {
        * permet le filtrage des commentaires
        * dans le fichier 
       */
-      while (fscanf(fichier, commentaire_regex) != 0);
+      while (fscanf(fichier, "#%*[^\n]%*c") != 0);
 
-      if (fscanf(fichier, "%*s%d%*s%d", &(*image)->nb_colones, &(*image)->nb_lignes) != 2)
+
+      if (fscanf(fichier, "%d%*[^0-9]%d\n", &(*image)->nb_colones, &(*image)->nb_lignes) != 2)
       {
          fclose(fichier);
          return -3;
@@ -178,10 +179,10 @@ int load_pnm(PNM **image, char* filename) {
           * permet le filtrage des commentaires
           * dans le fichier 
          */
-         while (fscanf(fichier, commentaire_regex) != 0);
+         while (fscanf(fichier, "#%*[^\n]%*c") != 0);
 
          if (
-            fscanf(fichier, "%*s%d", &(*image)->maximun_pixel) != 1 ||
+            fscanf(fichier, "%u\n", &(*image)->maximun_pixel) != 1 ||
             ((*image)->nombre_magique == P2 && (*image)->maximun_pixel > MAXIMUN_POUR_PIXEL) ||
             ((*image)->nombre_magique == P3 && (*image)->maximun_pixel > MAXIMUM_POUR_COULEUR)
          ) 
@@ -220,11 +221,14 @@ int load_pnm(PNM **image, char* filename) {
             break;
          
          case P3:
-            if ((*image)->type != PGM)
+            if ((*image)->type != PPM)
             {
                fclose(fichier);
                return -2;
             }
+            break;
+         
+         case NOMBRE_MAGIQUE_INCONNU:
             break;
       }
 
@@ -249,12 +253,38 @@ int load_pnm(PNM **image, char* filename) {
       longueur_ligne = (*image)->nb_colones*nombre_de_chiffre((*image)->maximun_pixel) + (*image)->nb_colones;
 
       if ((*image)->nombre_magique == P3)
-         longueur_ligne *= 3;
+         taille_pixel = 3;
 
+      longueur_ligne *= taille_pixel;
       longueur_ligne += 1;
       ligne = (char *) malloc(sizeof(char)*longueur_ligne);
+      int result;
 
+      while (i < (*image)->nb_lignes)
+      {
+         /**
+          * @brief 
+          * permet le filtrage des commentaires
+          * dans le fichier 
+         */
+         while (fscanf(fichier, "#%*[^\n]%*c") != 0);
+
+         if (
+            fgets(ligne, longueur_ligne, fichier) == NULL || 
+            (result = decoupe(ligne, (*image)->matrice[i], (*image)->nb_colones*taille_pixel)) != (*image)->nb_colones*taille_pixel
+         )
+         {
+            fclose(fichier);
+            detruit(*image);
+            return -2;
+         }
+
+         i++;
+      }
+      
+      
       fclose(fichier);
+      return 0;
    }
 
    return -2;
@@ -266,7 +296,7 @@ int write_pnm(PNM *image, char* filename) {
    FILE *fichier;
    char *ligne, pixel[7];
    const char *invalide = "/\\:*?\"<>|";
-   int i = 0, j, longueur_ligne, length = (int) strlen(filename);
+   int i = 0, j, longueur_ligne, length = (int) strlen(filename), taille_pixel = 1;
 
    while (i<length)
    {
@@ -296,8 +326,9 @@ int write_pnm(PNM *image, char* filename) {
    longueur_ligne = image->nb_colones*nombre_de_chiffre(image->maximun_pixel) + image->nb_colones;
 
    if (image->nombre_magique == P3)
-      longueur_ligne *= 3;
+      taille_pixel = 3;
 
+   longueur_ligne *= taille_pixel;
    longueur_ligne += 1;
    ligne = (char *) malloc(sizeof(char)*longueur_ligne);
 
@@ -315,7 +346,7 @@ int write_pnm(PNM *image, char* filename) {
       j = 0;
       ligne[0] = '\0';
 
-      for(; j<image->nb_colones; j++)
+      for(; j<image->nb_colones*taille_pixel; j++)
       {
          sprintf(pixel, "%d", image->matrice[i][j]);
          strcat(ligne, pixel);

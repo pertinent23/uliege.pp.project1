@@ -46,15 +46,15 @@ TYPE_FICHIER str_vers_type_fichier(char *file_name)
             extension[j++] = file_name[i];
         extension[j] = '\0';
 
-        if (strcmp(extension, "pbm") == 0)
+        if (strcmp(extension, ".pbm") == 0)
         {
             return PBM;
         }
-        else if (strcmp(extension, "pgm") == 0)
+        else if (strcmp(extension, ".pgm") == 0)
         {
             return PGM;
         }
-        else if (strcmp(extension, "ppm") == 0)
+        else if (strcmp(extension, ".ppm") == 0)
         {
             return PPM;
         }
@@ -111,4 +111,39 @@ unsigned int nombre_de_chiffre(int nb)
     }
     
     return result;
+}
+
+unsigned int decoupe(char *str, int *tableau, int nb_caractere)
+{
+    int i = 0, j = 0, length = strlen(str);
+    int pixel = 0, pixel_trouve = 0;
+    char pixel_value[2];
+
+    pixel_value[1] = '\0';
+    while (i < nb_caractere && j < length)
+    {
+        if (str[j] != ' ')
+        {
+            pixel_value[0] = str[j];
+            pixel *= 10;
+            pixel += atoi(pixel_value);
+            pixel_trouve = 1;
+        }
+        else if (pixel_trouve)
+        {
+            tableau[i++] = pixel;
+            pixel = 0;
+            pixel_trouve = 0;
+        }
+        j++;
+    }
+
+    if (pixel_trouve)
+    {
+        tableau[i++] = pixel;
+        pixel = 0;
+        pixel_trouve = 0;
+    }
+    
+    return i;
 }

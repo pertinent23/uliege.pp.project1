@@ -38,6 +38,7 @@
 static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, char **sortie, char **format)
 {
    int opt, erreur = 0;
+   int i = 0, f = 0, o = 0;
 
    while ((opt = getopt(argc, argv, optstring)) != -1)
    {
@@ -45,6 +46,7 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
       {
          case 'i':
             *entree = (char *) malloc(sizeof(char) * (strlen(optarg) + 1));
+            i = 1;
 
             if (*entree != NULL)
                strcpy(*entree, optarg);
@@ -55,6 +57,7 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
          
          case 'f':
             *format = (char *) malloc(sizeof(char) * (strlen(optarg) + 1));
+            f = 1;
             
             if (*format != NULL)
                strcpy(*format, optarg);
@@ -65,6 +68,7 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
          
          case 'o':
             *sortie = (char *) malloc(sizeof(char) * (strlen(optarg) + 1));
+            o = 1;
             
             if (*sortie != NULL)
                strcpy(*sortie, optarg);
@@ -89,14 +93,14 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
 
    if (erreur)
    {
-      if (entree != NULL)
-         free(entree);
+      if (*entree != NULL)
+         free(*entree);
       
-      if (sortie != NULL)
-         free(sortie);
+      if (*sortie != NULL)
+         free(*sortie);
       
-      if (format != NULL)
-         free(format);
+      if (*format != NULL)
+         free(*format);
       
       if (erreur == -1)
          printf("\n>> Argument de paramètre manquant." );
@@ -107,6 +111,21 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
       else 
          printf("\n>> Erreur inconnue." );
       
+      return 1;
+   }
+   else if (!i)
+   {
+      printf("\n>> Paramètre obligatoire manquant: -i" );
+      return 1;
+   }
+   else if (!o)
+   {
+      printf("\n>> Paramètre obligatoire manquant: -o" );
+      return 1;
+   }
+   else if (!f)
+   {
+      printf("\n>> Paramètre obligatoire manquant: -f" );
       return 1;
    }
 
@@ -156,7 +175,7 @@ int main(int argc, char *argv[]) {
             }
             else
             {
-               printf("\n>> Image `%s` parfaitement sauvergardé vers `%s`.", entree, sortie);
+               printf("\n>> Image `%s` parfaitement sauvergardé dans `%s`.", entree, sortie);
             }
          }
          else
