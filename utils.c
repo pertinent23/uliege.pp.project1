@@ -122,7 +122,7 @@ unsigned int decoupe(char *str, int *tableau, int nb_caractere)
     pixel_value[1] = '\0';
     while (i < nb_caractere && j < length)
     {
-        if (str[j] != ' ')
+        if (str[j] != ' ' && str[j] != '\n')
         {
             pixel_value[0] = str[j];
             pixel *= 10;

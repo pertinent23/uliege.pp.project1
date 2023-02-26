@@ -282,7 +282,6 @@ int load_pnm(PNM **image, char* filename) {
          i++;
       }
       
-      
       fclose(fichier);
       return 0;
    }
