@@ -146,12 +146,11 @@ int load_pnm(PNM **image, char* filename) {
 
       /**
        * @brief 
-       * permet le filtrage des commentaires
-       * dans le fichier 
+       * permet de verifier que le nombre 
+       * magique soit bien présent
       */
-      while (fscanf(fichier, "#%*[^\n]%*c") != 0);
 
-      if (fscanf(fichier, "%s\n", nombre_magique) != 1 || ((*image)->nombre_magique = str_vers_nombre_magique(nombre_magique)) == NOMBRE_MAGIQUE_INCONNU)
+      if (fscanf(fichier, "%[P1-3]\n", nombre_magique) != 1 || ((*image)->nombre_magique = str_vers_nombre_magique(nombre_magique)) == NOMBRE_MAGIQUE_INCONNU)
       {
          fclose(fichier);
          return -3;
@@ -165,6 +164,12 @@ int load_pnm(PNM **image, char* filename) {
       */
       while (fscanf(fichier, "#%*[^\n]%*c") != 0);
 
+
+      /**
+       * @brief 
+       * ici on veut recupérer le nombre de lignes
+       * et de colones dans le fichier
+      */
 
       if (fscanf(fichier, "%d%*[^0-9]%d\n", &(*image)->nb_colones, &(*image)->nb_lignes) != 2)
       {
@@ -180,6 +185,12 @@ int load_pnm(PNM **image, char* filename) {
           * dans le fichier 
          */
          while (fscanf(fichier, "#%*[^\n]%*c") != 0);
+
+         /**
+          * @brief 
+          * ici on veut récupérer la taille maximale
+          * d'un pixel
+         */
 
          if (
             fscanf(fichier, "%u\n", &(*image)->maximun_pixel) != 1 ||
@@ -260,6 +271,13 @@ int load_pnm(PNM **image, char* filename) {
       ligne = (char *) malloc(sizeof(char)*longueur_ligne);
       int result;
 
+      if (ligne == NULL)
+      {
+         fclose(fichier);
+         detruit(*image);
+         return -1;
+      }
+
       while (i < (*image)->nb_lignes)
       {
          /**
@@ -269,11 +287,19 @@ int load_pnm(PNM **image, char* filename) {
          */
          while (fscanf(fichier, "#%*[^\n]%*c") != 0);
          
+         /**
+          * @brief Construct a new if object
+          * ici on va lire une ligne, vérifier si ce n'est
+          * pas la fin du fichier et decouper cette ligne
+          * pour l'intégrer dans notre matrice 
+         */
+
          if (
             fgets(ligne, longueur_ligne, fichier) == NULL || 
             (result = decoupe(ligne, (*image)->matrice[i], (*image)->nb_colones*taille_pixel)) != (*image)->nb_colones*taille_pixel
          )
          {
+            free(ligne);
             fclose(fichier);
             detruit(*image);
             return -3;
@@ -281,7 +307,8 @@ int load_pnm(PNM **image, char* filename) {
 
          i++;
       }
-      
+
+      free(ligne);
       fclose(fichier);
       return 0;
    }
@@ -355,6 +382,7 @@ int write_pnm(PNM *image, char* filename) {
       fprintf(fichier, "%s\n", ligne);
    }
 
+   free(ligne);
    fclose(fichier);
    detruit(image);
 
