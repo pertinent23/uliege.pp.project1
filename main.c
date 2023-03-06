@@ -17,8 +17,8 @@
 #include <string.h>
 #include <getopt.h>
 
-#include "utils.h"
 #include "pnm.h"
+#include "utils.h"
 
 /**
  * @brief 
@@ -113,6 +113,11 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
       
       return 1;
    }
+   else if (!i && !o && !f)
+   {
+      printf("\n>> Aucun paramètres: -f -i -o" );
+      return 1;
+   }
    else if (!i)
    {
       printf("\n>> Paramètre obligatoire manquant: -i" );
@@ -136,14 +141,16 @@ int main(int argc, char *argv[]) {
 
    char *optstring = ":f:i:o:";
    char *entree, *sortie, *format;
+   TYPE_FICHIER t_entree, t_sortie, t_format;
 
    printf("\n\n---------------------------------------------------------");
    printf("\n>> Debut du traitement...");
    
    if (!gestionnaire(argc, argv, optstring, &entree, &sortie, &format)) 
    {
-      TYPE_FICHIER t_entree = str_vers_type_fichier(entree), t_sortie = str_vers_type_fichier(sortie);
-      TYPE_FICHIER t_format = format_vers_type_fichier(format);
+      t_entree = str_vers_type_fichier(entree); 
+      t_sortie = str_vers_type_fichier(sortie);
+      t_format = format_vers_type_fichier(format);
 
       if (t_format != t_entree || t_format != t_sortie)
       {
@@ -175,7 +182,7 @@ int main(int argc, char *argv[]) {
             }
             else
             {
-               printf("\n>> Image `%s` parfaitement sauvergardé dans `%s`.", entree, sortie);
+               printf("\n>> Image `%s` parfaitement sauvergardé comme `%s`.", entree, sortie);
             }
          }
          else

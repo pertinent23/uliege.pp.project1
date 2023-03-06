@@ -84,11 +84,48 @@ unsigned int nombre_de_chiffre(int nb);
  * de caractère et les socker dans un tableau
  * 
  * @param str 
+ * @param debut 
  * @param tableau 
  * @param nb_caractere 
  * @return unsigned int 
 */
-unsigned int decoupe(char *str, int *tableau, int nb_caractere);
+unsigned int decoupe(char *str, int debut, int *tableau, int nb_caractere);
+
+/**
+ * @brief 
+ * cette fonction est utilisée pour faire dépasser fscanf 
+ * les zones de commentaire
+ * 
+ * @param fichier 
+*/
+void saute_commentaire(FILE *fichier);
+
+
+/**
+ * @brief
+ * cette fonction va créer une chaine de caractère
+ * vide, représentant la ligne d'un fichier, en calculant 
+ * la longueur maximale d'une ligne d'un fichier 
+ * 
+ * la fonction retourne NULL si la ligne n'a pas été créée
+ * 
+ * @param nb_colones 
+ * @param taille_max_pixel 
+ * @param taille_pixel 
+ * @param longueur_ligne 
+ * @return char* 
+*/
+char *creer_ligne(int nb_colones, int taille_max_pixel, int taille_pixel, int *longueur_ligne);
+
+/**
+ * @brief 
+ * Retourne les nombre d'informations pour un pixel
+ * selon le type de fichier
+ * 
+ * @param num 
+ * @return unsigned int 
+*/
+int taille_pixel(NOMBRE_MAGIQUE num);
 
 
 #endif // 

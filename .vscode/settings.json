@@ -4,6 +4,9 @@
         "*.rmd": "markdown",
         "utils.h": "c",
         "assert.h": "c",
-        "string.h": "c"
-    }
+        "string.h": "c",
+        "stdio.h": "c"
+    },
+    "docify.commentService.docstringFormat": "JavaDoc",
+    "docify.commentService.autoTranslationService": "French"
 }

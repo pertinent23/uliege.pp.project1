@@ -14,8 +14,8 @@ LDFLAGS=
 
 # Files
 EXEC=pnm
-MODULES=main.c pnm.c utils.c
-OBJECTS=main.o pnm.o utils.o
+MODULES=utils.c pnm.c main.c
+OBJECTS=utils.o pnm.o main.o
 
 ## Rules
 

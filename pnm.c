@@ -79,14 +79,11 @@ static int initialise(struct PNM_t *image, int lignes, int colones)
          return 1;
       }
 
-      int i = 0, nb_pixel = 1;
-
-      if (image->nombre_magique == P3)
-         nb_pixel = 3;
+      int i = 0;
 
       for(; i<lignes; i++)
       {
-         image->matrice[i] = (int *) malloc(sizeof(int) * colones * nb_pixel);
+         image->matrice[i] = (int *) malloc(sizeof(int) * colones * taille_pixel(image->nombre_magique));
          if (image->matrice[i] == NULL)
          {
             for(; i>=0; i--)
@@ -130,9 +127,8 @@ int load_pnm(PNM **image, char* filename) {
    assert(image != NULL && filename != NULL);
 
    FILE *fichier = fopen(filename, "r");
-   unsigned int longueur_ligne = 0;
-   int i = 0;
-   char *ligne, nombre_magique[3], taille_pixel = 1;
+   int i = 0, j, result, longueur_ligne;
+   char *ligne, nombre_magique[3];
 
    if (fichier != NULL)
    {
@@ -162,7 +158,7 @@ int load_pnm(PNM **image, char* filename) {
        * permet le filtrage des commentaires
        * dans le fichier 
       */
-      while (fscanf(fichier, "#%*[^\n]%*c") != 0);
+      saute_commentaire(fichier);
 
 
       /**
@@ -171,7 +167,11 @@ int load_pnm(PNM **image, char* filename) {
        * et de colones dans le fichier
       */
 
-      if (fscanf(fichier, "%d%*[^0-9]%d\n", &(*image)->nb_colones, &(*image)->nb_lignes) != 2)
+      if (
+         fscanf(fichier, "%d%*[^0-9]%d\n", &(*image)->nb_colones, &(*image)->nb_lignes) != 2 ||
+         (*image)->nb_colones <= 0 ||
+         (*image)->nb_lignes <= 0 
+      )
       {
          fclose(fichier);
          return -3;
@@ -184,7 +184,7 @@ int load_pnm(PNM **image, char* filename) {
           * permet le filtrage des commentaires
           * dans le fichier 
          */
-         while (fscanf(fichier, "#%*[^\n]%*c") != 0);
+         saute_commentaire(fichier);
 
          /**
           * @brief 
@@ -254,22 +254,12 @@ int load_pnm(PNM **image, char* filename) {
          return -1;
       }
 
-      /**
-       * @brief 
-       * la longueur maximale d'un ligne est égale au nombre de chiffres de la 
-       * valeur d'un pixel fois le nombre de colones de l'image, plus le nombre
-       * de caractères d'espacement de la ligne (nombre de colones - 1) plus 1
-       * (pour le symbol de fin des chaines de caractères)
-      */
-      longueur_ligne = (*image)->nb_colones*nombre_de_chiffre((*image)->maximun_pixel) + (*image)->nb_colones;
-
-      if ((*image)->nombre_magique == P3)
-         taille_pixel = 3;
-
-      longueur_ligne *= taille_pixel;
-      longueur_ligne += 2;
-      ligne = (char *) malloc(sizeof(char)*longueur_ligne);
-      int result;
+      ligne = creer_ligne(
+         (*image)->nb_colones, 
+         (*image)->maximun_pixel, 
+         taille_pixel((*image)->nombre_magique), 
+         &longueur_ligne
+      );
 
       if (ligne == NULL)
       {
@@ -278,6 +268,7 @@ int load_pnm(PNM **image, char* filename) {
          return -1;
       }
 
+      i = j = 0;
       while (i < (*image)->nb_lignes)
       {
          /**
@@ -285,7 +276,7 @@ int load_pnm(PNM **image, char* filename) {
           * permet le filtrage des commentaires
           * dans le fichier 
          */
-         while (fscanf(fichier, "#%*[^\n]%*c") != 0);
+         saute_commentaire(fichier);
          
          /**
           * @brief Construct a new if object
@@ -296,7 +287,7 @@ int load_pnm(PNM **image, char* filename) {
 
          if (
             fgets(ligne, longueur_ligne, fichier) == NULL || 
-            (result = decoupe(ligne, (*image)->matrice[i], (*image)->nb_colones*taille_pixel)) != (*image)->nb_colones*taille_pixel
+            (result = decoupe(ligne, j, (*image)->matrice[i], (*image)->nb_colones*taille_pixel((*image)->nombre_magique))) == 0
          )
          {
             free(ligne);
@@ -305,7 +296,13 @@ int load_pnm(PNM **image, char* filename) {
             return -3;
          }
 
-         i++;
+         j += result - j;
+
+         if (j >= (*image)->nb_colones*taille_pixel((*image)->nombre_magique))
+         {
+            j = 0;
+            i++;
+         }
       }
 
       free(ligne);
@@ -322,7 +319,7 @@ int write_pnm(PNM *image, char* filename) {
    FILE *fichier;
    char *ligne, pixel[7];
    const char *invalide = "/\\:*?\"<>|";
-   int i = 0, j, longueur_ligne, length = (int) strlen(filename), taille_pixel = 1;
+   int i = 0, j, length = (int) strlen(filename);
 
    while (i<length)
    {
@@ -342,21 +339,12 @@ int write_pnm(PNM *image, char* filename) {
    if (image->nombre_magique != P1)
       fprintf(fichier, "%u\n", image->maximun_pixel);
 
-   /**
-    * @brief 
-    * la longueur maximale d'un ligne est égale au nombre de chiffres de la 
-    * valeur d'un pixel fois le nombre de colones de l'image, plus le nombre
-    * de caractères d'espacement de la ligne (nombre de colones - 1) plus 1
-    * (pour le symbol de fin des chaines de caractères)
-   */
-   longueur_ligne = image->nb_colones*nombre_de_chiffre(image->maximun_pixel) + image->nb_colones;
-
-   if (image->nombre_magique == P3)
-      taille_pixel = 3;
-
-   longueur_ligne *= taille_pixel;
-   longueur_ligne += 1;
-   ligne = (char *) malloc(sizeof(char)*longueur_ligne);
+   ligne = creer_ligne( 
+      image->nb_colones, 
+      image->maximun_pixel, 
+      taille_pixel(image->nombre_magique), 
+      NULL
+   );
 
    if (ligne == NULL)
    {
@@ -372,7 +360,7 @@ int write_pnm(PNM *image, char* filename) {
       j = 0;
       ligne[0] = '\0';
 
-      for(; j<image->nb_colones*taille_pixel; j++)
+      for(; j<image->nb_colones*taille_pixel(image->nombre_magique); j++)
       {
          sprintf(pixel, "%d", image->matrice[i][j]);
          strcat(ligne, pixel);
