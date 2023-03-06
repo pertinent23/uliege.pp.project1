@@ -5,29 +5,39 @@
  * de fichiers pnm.
  *
  * @author: HEUBA BATOMEN Franck Duval S227629
- * @date: 
+ * @date: 07/03/2023
  * @projet: INFO0030 Projet 1
 */
 
 #ifndef __UTILS__
 #define __UTILS__
+#include <stdio.h>
 
-/*
+/*! @class TYPE_FICHIER  
+ * 
+ * @brief 
+ * Représente la liste des types accepetables par notre programme
  * Déclaration du type TYPE_FICHIER
-*/
+ *
+ */
+/*! This is an enum class */
 typedef enum{
     TYPE_INCONNU = 27, PBM, PGM, PPM  
 } TYPE_FICHIER;
 
-/*
+/*! @class NOMBRE_MAGIQUE  
+ * 
+ * @brief 
+ * Représente tous les nombres magiques possibles
  * Déclaration du type NOMBRE_MAGIQUE
-*/
+ */
 typedef enum{
     NOMBRE_MAGIQUE_INCONNU = 1, P1, P2, P3
 } NOMBRE_MAGIQUE;
 
 
-/**
+/*! @fn NOMBRE_MAGIQUE str_vers_nombre_magique(char *nombre_magique)
+ *
  * @brief 
  * retourne le nombre magique à partir de sa valeur
  * en chaine de caractère. 

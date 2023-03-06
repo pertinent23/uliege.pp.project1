@@ -5,7 +5,7 @@
  * de fichiers pnm.
  *
  * @author: HEUBA BATOMEN Franck Duval S227629
- * @date: 
+ * @date: 07/03/2023
  * @projet: INFO0030 Projet 1
 */
 
@@ -15,6 +15,7 @@
 #include <string.h> 
 
 #include "utils.h"
+
 
 NOMBRE_MAGIQUE str_vers_nombre_magique(char *nombre_magique)
 {

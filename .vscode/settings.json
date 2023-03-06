@@ -5,7 +5,8 @@
         "utils.h": "c",
         "assert.h": "c",
         "string.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "pnm.h": "c"
     },
     "docify.commentService.docstringFormat": "JavaDoc",
     "docify.commentService.autoTranslationService": "French"

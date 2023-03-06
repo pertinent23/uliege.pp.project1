@@ -1,0 +1,11 @@
+digraph "PNM_t"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="PNM_t",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Définition du type opaque PNM."];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" nombre_magique" ,fontname="Helvetica"];
+  Node2 [label="NOMBRE_MAGIQUE",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNOMBRE__MAGIQUE.html",tooltip="Représente tous les nombres magiques possibles Déclaration du type NOMBRE_MAGIQUE."];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" type" ,fontname="Helvetica"];
+  Node3 [label="TYPE_FICHIER",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classTYPE__FICHIER.html",tooltip="Représente la liste des types accepetables par notre programme Déclaration du type TYPE_FICHIER."];
+}

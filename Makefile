@@ -11,11 +11,16 @@ CC=gcc
 CFLAGS=--std=c99 --pedantic -Wall -W -Wmissing-prototypes
 LD=gcc
 LDFLAGS=
+AT=tar
+ATFLAGS=-zcvf
+DT=doxygen
 
 # Files
 EXEC=pnm
 MODULES=utils.c pnm.c main.c
 OBJECTS=utils.o pnm.o main.o
+OUTPUT=project_1.tar.gz
+CONFIG=doxygen.config
 
 ## Rules
 
@@ -34,5 +39,10 @@ utils.o: utils.c
 	$(CC) -c utils.c -o utils.o $(CFLAGS)
 
 clean:
-	rm -f *.o $(EXEC) *~
+	rm -f *.o $(EXEC) $(OUTPUT) *~
 
+archive:
+	$(AT) $(ATFLAGS) $(OUTPUT) *
+
+doc:
+	$(DT) $(CONFIG)

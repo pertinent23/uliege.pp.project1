@@ -5,7 +5,7 @@
  * les fonctions de manipulation d'images PNM.
  * 
  * @author: HEUBA BATOMEN Franck Duval S227629
- * @date: 
+ * @date: 07/03/2023
  * @projet: INFO0030 Projet 1
 */
 
@@ -19,12 +19,27 @@
 
 
 /**
+ * @struct PNM_t
+ * 
+ * @brief 
  * Définition du type opaque PNM
- *
- */
+ * 
+ * @var PNM_t::nb_colones
+ * représente le nombre de colones de pixels
+ * de l'image
+ * 
+ * @var PNM_t::nb_lignes
+ * représente le nombre de lignes de pixels
+ * de l'image
+ * 
+ * @var PNM_t::matrice
+ * représente la matrice des pixels de l'image
+ * de l'image
+ * 
+ * @var PNM_t::maximun_pixel
+ * représente la taille maximale d'un pixel
+*/
 struct PNM_t {
-
-   /* Insérez ici les champs de la structure PNM */
    int nb_colones;
    int nb_lignes;
    unsigned int maximun_pixel;
@@ -35,6 +50,8 @@ struct PNM_t {
 
 
 /**
+ * @fn static struct PNM_t *construit() 
+ * 
  * @brief 
  * Va créer un objet PNM_t puis le mettre en mémoire
  * et le retourner
