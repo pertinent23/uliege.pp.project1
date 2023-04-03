@@ -66,5 +66,14 @@ int load_pnm(PNM **image, char* filename);
  */
 int write_pnm(PNM *image, char* filename);
 
+/**
+ * @brief 
+ * Cette fonction permet de dédruire 
+ * un objet crée
+ * 
+ * @param image 
+*/
+void detruit_pnm(struct PNM_t *image);
+
 #endif // __PNM__
 

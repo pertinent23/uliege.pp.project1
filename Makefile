@@ -39,9 +39,9 @@ utils.o: utils.c
 	$(CC) -c utils.c -o utils.o $(CFLAGS)
 
 clean:
-	rm -f *.o $(EXEC) $(OUTPUT) *~
+	rm -f *.o *.ppm *.pgm .*pbm $(EXEC) $(OUTPUT) *~
 
-archive:
+archive: clean
 	$(AT) $(ATFLAGS) $(OUTPUT) *
 
 doc:

@@ -96,9 +96,7 @@ static int initialise(struct PNM_t *image, int lignes, int colones)
          return 1;
       }
 
-      int i = 0;
-
-      for(; i<lignes; i++)
+      for(int i = 0; i<lignes; i++)
       {
          image->matrice[i] = (int *) malloc(sizeof(int) * colones * taille_pixel(image->nombre_magique));
          if (image->matrice[i] == NULL)
@@ -116,14 +114,7 @@ static int initialise(struct PNM_t *image, int lignes, int colones)
    return 0;
 }
 
-/**
- * @brief 
- * Cette fonction permet de dédruire 
- * un objet crée
- * 
- * @param image 
-*/
-static void detruit(struct PNM_t *image) 
+void detruit_pnm(struct PNM_t *image) 
 {
    assert(image != NULL && image->nb_lignes > 0 && image->nb_colones > 0);
    int i = 0;
@@ -144,8 +135,7 @@ int load_pnm(PNM **image, char* filename) {
    assert(image != NULL && filename != NULL);
 
    FILE *fichier = fopen(filename, "r");
-   int i = 0, j, result, longueur_ligne;
-   char *ligne, nombre_magique[3];
+   char nombre_magique[3];
 
    if (fichier != NULL)
    {
@@ -271,22 +261,7 @@ int load_pnm(PNM **image, char* filename) {
          return -1;
       }
 
-      ligne = creer_ligne(
-         (*image)->nb_colones, 
-         (*image)->maximun_pixel, 
-         taille_pixel((*image)->nombre_magique), 
-         &longueur_ligne
-      );
-
-      if (ligne == NULL)
-      {
-         fclose(fichier);
-         detruit(*image);
-         return -1;
-      }
-
-      i = j = 0;
-      while (i < (*image)->nb_lignes)
+      for (int i = 0; i < (*image)->nb_lignes; i++)
       {
          /**
           * @brief 
@@ -294,7 +269,7 @@ int load_pnm(PNM **image, char* filename) {
           * dans le fichier 
          */
          saute_commentaire(fichier);
-         
+
          /**
           * @brief Construct a new if object
           * ici on va lire une ligne, vérifier si ce n'est
@@ -302,27 +277,17 @@ int load_pnm(PNM **image, char* filename) {
           * pour l'intégrer dans notre matrice 
          */
 
-         if (
-            fgets(ligne, longueur_ligne, fichier) == NULL || 
-            (result = decoupe(ligne, j, (*image)->matrice[i], (*image)->nb_colones*taille_pixel((*image)->nombre_magique))) == 0
-         )
+         for(int j = 0; j < (*image)->nb_colones*taille_pixel((*image)->nombre_magique); j++)
          {
-            free(ligne);
-            fclose(fichier);
-            detruit(*image);
-            return -3;
-         }
-
-         j += result - j;
-
-         if (j >= (*image)->nb_colones*taille_pixel((*image)->nombre_magique))
-         {
-            j = 0;
-            i++;
+            if (fscanf(fichier, "%d", &(*image)->matrice[i][j]) != 1)
+            {
+               fclose(fichier);
+               detruit_pnm(*image);
+               return -3;
+            }
          }
       }
 
-      free(ligne);
       fclose(fichier);
       return 0;
    }
@@ -334,15 +299,13 @@ int write_pnm(PNM *image, char* filename) {
    assert(image != NULL && filename != NULL);
 
    FILE *fichier;
-   char *ligne, pixel[7];
    const char *invalide = "/\\:*?\"<>|";
-   int i = 0, j, length = (int) strlen(filename);
+   int length = (int) strlen(filename);
 
-   while (i<length)
+   for(int k=0; k<length; k++)
    {
-      if (strchr(invalide, filename[i]) != NULL)
+      if (strchr(invalide, filename[k]) != NULL)
          return -1;
-      i++;
    }
    
    fichier = fopen(filename, "w");
@@ -356,40 +319,14 @@ int write_pnm(PNM *image, char* filename) {
    if (image->nombre_magique != P1)
       fprintf(fichier, "%u\n", image->maximun_pixel);
 
-   ligne = creer_ligne( 
-      image->nb_colones, 
-      image->maximun_pixel, 
-      taille_pixel(image->nombre_magique), 
-      NULL
-   );
-
-   if (ligne == NULL)
+   for(int i = 0; i<image->nb_lignes; i++)
    {
-      fclose(fichier);
-      remove(filename);
-      return -2;
+      for(int j = 0; j<image->nb_colones*taille_pixel(image->nombre_magique); j++)
+         fprintf(fichier, "%d ", image->matrice[i][j]);
+      fprintf(fichier, "\n");
    }
 
-   i = 0;
-
-   for(; i<image->nb_lignes; i++)
-   {
-      j = 0;
-      ligne[0] = '\0';
-
-      for(; j<image->nb_colones*taille_pixel(image->nombre_magique); j++)
-      {
-         sprintf(pixel, "%d", image->matrice[i][j]);
-         strcat(ligne, pixel);
-         strcat(ligne, " ");
-      }
-
-      fprintf(fichier, "%s\n", ligne);
-   }
-
-   free(ligne);
    fclose(fichier);
-   detruit(image);
 
    return 0;
 }

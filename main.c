@@ -78,10 +78,23 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
             break;
          
          case ':':
+            switch (optopt)
+            {
+               case 'i':
+               case 'o':
+               case 'f':
+                  printf("\n>> Argument manquant pour le paramètre: -%c", optopt);
+                  break;
+
+               default:
+                  break;
+            }
+
             erreur = -1;
             break;
          
          case '?':
+            printf("\n>> Paramètre inconnu entrée." );
             erreur = -2;
             break;
 
@@ -93,44 +106,23 @@ static int gestionnaire(int argc, char *argv[], char *optstring, char **entree, 
 
    if (erreur)
    {
-      if (*entree != NULL)
-         free(*entree);
+      if (i) free(*entree);
+      if (o) free(*sortie);
+      if (f) free(*format);
       
-      if (*sortie != NULL)
-         free(*sortie);
-      
-      if (*format != NULL)
-         free(*format);
-      
-      if (erreur == -1)
-         printf("\n>> Argument de paramètre manquant." );
-      else if (erreur == -2)
-         printf("\n>> Paramètre inconnu entrée." );
-      else if (erreur == -3)
+      if (erreur == -3)
          printf("\n>> Problème de gestion des entrées/sorties/format peut-être dû à leur taille." );
       else 
          printf("\n>> Erreur inconnue." );
       
       return 1;
    }
-   else if (!i && !o && !f)
+   else if (o + f + i < 3)
    {
-      printf("\n>> Aucun paramètres: -f -i -o" );
-      return 1;
-   }
-   else if (!i)
-   {
-      printf("\n>> Paramètre obligatoire manquant: -i" );
-      return 1;
-   }
-   else if (!o)
-   {
-      printf("\n>> Paramètre obligatoire manquant: -o" );
-      return 1;
-   }
-   else if (!f)
-   {
-      printf("\n>> Paramètre obligatoire manquant: -f" );
+      if (!i) printf("\n>> Paramètre obligatoire manquant: -i" );
+      if (!o) printf("\n>> Paramètre obligatoire manquant: -o" );
+      if (!f) printf("\n>> Paramètre obligatoire manquant: -f" );
+
       return 1;
    }
 
@@ -183,6 +175,7 @@ int main(int argc, char *argv[]) {
             else
             {
                printf("\n>> Image `%s` parfaitement sauvergardé comme `%s`.", entree, sortie);
+               detruit_pnm(image);
             }
          }
          else
@@ -203,6 +196,10 @@ int main(int argc, char *argv[]) {
             }
          }
       }
+
+      free(entree);
+      free(sortie);
+      free(format);
    }   
 
    printf("\n>> Fin du traitement...");
