@@ -126,6 +126,8 @@ void detruit_pnm(struct PNM_t *image)
          if (image->matrice[i] != NULL)
             free(image->matrice[i]);
       }
+
+      free(image->matrice);
    }
 
    free(image);
